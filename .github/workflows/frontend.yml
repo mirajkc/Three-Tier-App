@@ -31,4 +31,6 @@ jobs:
       
       - name: Push Docker Image
         run: |
-         docker push ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest   
+         docker push ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest  
+         
+         
