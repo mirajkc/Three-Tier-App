@@ -23,7 +23,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_REPO.secrets.USERNAME }}
-          password: ${{ env.DOCKER_REPO.secrets.PASSWORD}}
+          password: ${{ env.DOCKER_REPO.secrets.PASSWORD }}
 
       - name: Build Docker IMage 
         run: |
