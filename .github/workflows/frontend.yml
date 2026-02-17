@@ -1,0 +1,34 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+
+env:
+  DOCKER_REPO: three-tier-app
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.MIRAJ69 }}
+          password: ${{ secrets.GITHUB_TOKEN}}
+
+      - name: Build Docker IMage 
+        run: |
+          docker build -t ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest ./frontend
+      
+      - name: Push Docker Image
+        run: |
+         docker push ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest   
