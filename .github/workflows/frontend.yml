@@ -31,4 +31,4 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.PASSWORD }}/${{ env.DOCKER_REPO }}:latest
+          docker push ${{ secrets.USERNAME }}/${{ env.DOCKER_REPO }}:latest
