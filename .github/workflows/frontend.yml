@@ -1,34 +1,82 @@
+# name: Frontend CI/CD
+
+# on:
+#   push:
+#     branches:
+#       - dev
+
+# env:
+#   DOCKER_REPO: three-tier-app
+
+# jobs:
+#   build-and-push:
+#     runs-on: ubuntu-latest
+
+#     steps: 
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+      
+#       - name: Login to Docker Hub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ secrets.MIRAJ69 }}
+#           password: ${{ secrets.GITHUB_TOKEN}}
+
+#       - name: Build Docker IMage 
+#         run: |
+#           docker build -t ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest ./frontend
+      
+#       - name: Push Docker Image
+#         run: |
+#          docker push ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest   
+
+
 name: Frontend CI/CD
 
 on:
   push:
     branches:
-      - dev
-
-env:
-  DOCKER_REPO: three-tier-app
+      - main
 
 jobs:
-  build-and-push:
+  deploy:
     runs-on: ubuntu-latest
 
-    steps: 
-      - name: Checkout code
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          username: ${{ secrets.MIRAJ69 }}
-          password: ${{ secrets.GITHUB_TOKEN}}
+          node-version: 18
 
-      - name: Build Docker IMage 
+      - name: Install Dependencies
         run: |
-          docker build -t ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest ./frontend
-      
-      - name: Push Docker Image
+          cd frontend
+          npm ci
+
+      - name: Build Project
         run: |
-         docker push ${{secrets.MIRAJ69}}/${{env.DOCKER_REPO}}:latest   
+          cd frontend
+          npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-east-1
+
+      - name: Upload to S3
+        run: |
+          aws s3 sync frontend/dist s3://miraj-bucket-frontend --delete
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id EXV8UBV55SCSC \
+            --paths "/*"
